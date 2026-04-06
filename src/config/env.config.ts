@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { config } from 'dotenv';
-config({ quiet: true });
+
+// Load environment variables from multiple files
+// Priority: process.env > .env.development.local > .env
+config({ path: '.env.development.local', override: false });
+config({ path: '.env', override: false });
 
 
 
@@ -16,7 +20,7 @@ const envSchema = z.object({
 
     // SESSION
     BETTER_AUTH_SECRET: z.string().min(32, '[ENV] BetterAuth secret must be at least 32 characters'),
-    BETTER_AUTH_URL: z.url(),
+    BETTER_AUTH_URL: z.string().url().default('http://localhost:4000'),
     BETTER_AUTH_LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 
     // SECURITY
@@ -24,21 +28,21 @@ const envSchema = z.object({
     RATE_LIMIT_WINDOW_MS: z.string().default('900000').transform(Number).pipe(z.number().positive()), // 15 min
     RATE_LIMIT_MAX_REQUESTS: z.string().default('100').transform(Number).pipe(z.number().positive()),
 
-    // EMAIL
-    EMAIL_HOST: z.string(),
-    EMAIL_PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)),
-    EMAIL_USER: z.email(),
-    EMAIL_PASS: z.string(),
-    EMAIL_FROM: z.email(),
+    // EMAIL (optional for development)
+    EMAIL_HOST: z.string().optional(),
+    EMAIL_PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).optional(),
+    EMAIL_USER: z.string().email().optional(),
+    EMAIL_PASS: z.string().optional(),
+    EMAIL_FROM: z.string().email().optional(),
     EMAIL_SECURE: z.string().default('false').transform(val => val === 'true'),
 
     // APPLICATION
-    APP_URL: z.url().default('http://localhost:4000'),
-    FRONTEND_URL: z.url().default('http://localhost:3000'),
+    APP_URL: z.string().url().default('http://localhost:4000'),
+    FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 
     // TOKENS
-    VERIFICATION_TOKEN_EXPIRE_IN: z.string().default('24').transform(Number).pipe(z.number().positive()),
-    PASSWORD_RESET_TOKEN_EXPIRE_IN: z.string().default('1').transform(Number).pipe(z.number().positive()),
+    VERIFICATION_TOKEN_EXPIRE_IN: z.string().default('86400').transform(Number).pipe(z.number().positive()),
+    PASSWORD_RESET_TOKEN_EXPIRE_IN: z.string().default('3600').transform(Number).pipe(z.number().positive()),
 });
 
 
