@@ -114,6 +114,37 @@ app.use(generalRateLimiterMiddleware);
 
 
 /**
+ * HEALTH CHECK ENDPOINT
+ */
+
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        environment: env.NODE_ENV,
+        uptime: process.uptime(),
+    });
+});
+
+app.get('/', (req, res) => {
+    res.json({
+        name: 'Express BetterAuth API',
+        version: '1.0.0',
+        description: 'Backend API with authentication powered by BetterAuth',
+        endpoints: {
+            health: '/health',
+            auth: '/api/auth/*',
+        },
+        docs: {
+            auth_signup: 'POST /api/auth/sign-up',
+            auth_signin: 'POST /api/auth/sign-in',
+            auth_signout: 'POST /api/auth/sign-out',
+            auth_session: 'GET /api/auth/session',
+        },
+    });
+});
+
+/**
  * API ROUTES
  */
 
